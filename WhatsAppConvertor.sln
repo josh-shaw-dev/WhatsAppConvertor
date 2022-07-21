@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32112.339
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WhatsAppConvertor", "WhatsAppConvertor\WhatsAppConvertor.csproj", "{773CDE14-CAE9-4E7A-8641-16D9CD4FF1B9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RazorTemplates", "RazorTemplates\RazorTemplates.csproj", "{3B9F5759-7B45-4C6A-A340-9AFA1008A7A7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WhatsAppConvertor.Domain", "Domain\WhatsAppConvertor.Domain.csproj", "{00E2B129-5CA4-4200-BCA1-7727CC2B3041}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{773CDE14-CAE9-4E7A-8641-16D9CD4FF1B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{773CDE14-CAE9-4E7A-8641-16D9CD4FF1B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{773CDE14-CAE9-4E7A-8641-16D9CD4FF1B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{773CDE14-CAE9-4E7A-8641-16D9CD4FF1B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B9F5759-7B45-4C6A-A340-9AFA1008A7A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B9F5759-7B45-4C6A-A340-9AFA1008A7A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B9F5759-7B45-4C6A-A340-9AFA1008A7A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B9F5759-7B45-4C6A-A340-9AFA1008A7A7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{00E2B129-5CA4-4200-BCA1-7727CC2B3041}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00E2B129-5CA4-4200-BCA1-7727CC2B3041}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00E2B129-5CA4-4200-BCA1-7727CC2B3041}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00E2B129-5CA4-4200-BCA1-7727CC2B3041}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5674EE0A-2AF7-486E-8227-5005C52E8004}
+	EndGlobalSection
+EndGlobal

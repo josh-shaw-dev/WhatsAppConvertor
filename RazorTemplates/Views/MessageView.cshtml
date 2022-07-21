@@ -1,0 +1,35 @@
+﻿@model RazorTemplates.Models.ChatMessagesModel
+
+<html>
+<head>
+</head>
+<body>
+    @{
+        /*
+         * This is a bit of a mess, needs a decent way of grouping to make a page like the web whatsapp
+         */
+        var grouped = Model.ChatMessagesAndContacts.GroupBy(c => c.ChatMessage.ChatId);
+
+        foreach (var group in grouped)
+        {
+            int chatId = group.Key;
+
+            if (!group.Any())
+            {
+                continue;
+            }
+
+            var displayName = group.Where(g => !string.IsNullOrWhiteSpace(g.Contact?.DisplayName))
+                .Select(c => c.Contact?.DisplayName).FirstOrDefault();
+
+            <div>----- From: @displayName -----</div>
+
+            foreach(var item in group)
+            {
+                <div>@item.ChatMessage?.MessageFrom - @item.ChatMessage?.MessageText</div>                
+            }
+            <div>--------------------------------------------------</div>
+        }
+    }
+</body>
+</html>
