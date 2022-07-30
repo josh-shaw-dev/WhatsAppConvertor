@@ -40,7 +40,7 @@ namespace WhatsAppConvertor.Exporters
                     {
                         DateTimeOffset messageRecievedTime = DateTimeOffset.FromUnixTimeMilliseconds(message.MessageRecievedTime);
                         string? from = message.MessageFromMe ? "Me" : contact?.DisplayName ?? contact?.RawStringJid;
-                        string? messageText = message.MediaFilePath ?? message.MessageText;
+                        string? messageText = message.FilePath ?? message.MessageText;
 
                         string messageCat = $"{messageRecievedTime:s} - {from} - {messageText}";
                         await writer.WriteLineAsync(messageCat);

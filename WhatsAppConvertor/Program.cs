@@ -43,7 +43,7 @@ foreach (ChatMessage chatMessage in chats)
 {
     contactsJidDict.TryGetValue(chatMessage.RawStringJid ?? string.Empty, out Contact? contact);
     string? from = chatMessage.MessageFromMe ? "Me" : contact?.DisplayName ?? contact?.RawStringJid;
-    string? messageText = chatMessage.MediaFilePath ?? chatMessage.MessageText;
+    string? messageText = chatMessage.FilePath ?? chatMessage.MessageText;
 
     ChatMessageAndContact message = new()
     {

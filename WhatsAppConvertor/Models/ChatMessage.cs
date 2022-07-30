@@ -14,7 +14,11 @@
 
         public string? MessageText { get; set; }
 
-        public string? MediaFilePath { get; set; }
+        public string? FilePath { get; set; }
+
+        public byte[]? Thumbnail { get; set; }
+
+        public MessageType? MessageType { get; set; }
 
         public int ChatId { get; set; }
     }

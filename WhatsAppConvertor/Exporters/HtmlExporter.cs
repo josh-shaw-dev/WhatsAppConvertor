@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Razor.Templating.Core;
 using RazorTemplates.Models;
+using System.Text.Json;
 using WhatsAppConvertor.Configuration;
 using WhatsAppConvertor.Domain.Dto;
 using WhatsAppConvertor.Models;
@@ -32,10 +33,17 @@ namespace WhatsAppConvertor.Exporters
         {
             if (_options.Html)
             {
-                string outputPath = Path.Combine(_options.Directory, "output.html");
+                /*
+                 * TODO I think for large amount of messages I should serialize them to disk
+                 * then have the browser load in each chat when its needed
+                 * It won't be a easy to share single file though will be much nicer on the browser to load
+                 */
 
+                string outputDir = Path.Combine(_options.Directory, "html");
+                string outputPath = Path.Combine(outputDir, "output.html");
                 _logger.LogInformation("Html export enabled, exporting to {ExportPath}", outputPath);
 
+                Directory.CreateDirectory(outputDir);
                 RazorTemplateEngine.Initialize();
 
                 List<ChatMessageDto> mappedMessages = _mapper.Map<List<ChatMessageDto>>(chats);
@@ -50,10 +58,33 @@ namespace WhatsAppConvertor.Exporters
                 using StreamWriter htmlWriter = File.CreateText(outputPath);
 
                 await htmlWriter.WriteAsync(html);
+
+                await SerializeData(outputDir, chats);
             }
             else
             {
                 _logger.LogDebug("Html export is not enabled");
+            }
+        }
+
+        private static async Task SerializeData(string outputBaseDirectory, IEnumerable<ChatMessage> chats)
+        {
+            JsonSerializerOptions serializerOptions = new()
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
+            IEnumerable<IGrouping<int, ChatMessage>> groupedChats = chats.GroupBy(c => c.ChatId);
+            string outputChatDirectory = Path.Combine(outputBaseDirectory, "chats");
+            Directory.CreateDirectory(outputChatDirectory);
+
+            foreach (IGrouping<int, ChatMessage> groupChat in groupedChats)
+            {
+                int chatId = groupChat.Key;
+                string chatOutputPath = Path.Combine(outputChatDirectory, $"chat-{chatId}.json");
+
+                using FileStream messageStream = File.Create(chatOutputPath);
+                await JsonSerializer.SerializeAsync(messageStream, groupChat, serializerOptions);
+                await messageStream.DisposeAsync();
             }
         }
     }

@@ -10,7 +10,7 @@ namespace WhatsAppConvertor.Mapping
         {
             CreateMap<ChatMessage, ChatMessageDto>()
                 .ForMember(dest => dest.MessageFrom, opt => opt.MapFrom(src => src.MessageFromMe ? "Me" : "Them"))
-                .ForMember(dest => dest.MessageText, opt => opt.MapFrom(src => src.MessageText ?? src.MediaFilePath));
+                .ForMember(dest => dest.MessageText, opt => opt.MapFrom(src => src.MessageText ?? src.FilePath));
             CreateMap<Contact, ContactDto>();
             CreateMap<ChatMessageAndContact, ChatMessageAndContactDto>();
         }

@@ -31,17 +31,20 @@ namespace WhatsAppConvertor.Data
             const string commandText =
             @"
                 SELECT 
-	                raw_string_jid AS RawStringJid,
+	                cv.raw_string_jid AS RawStringJid,
 	                mv._id AS MessageId,
 	                mv.sort_id AS MessageSortId,
 	                mv.from_me AS MessageFromMe,
 	                mv.chat_row_id as ChatId,
 	                mv.received_timestamp AS MessageRecievedTime,
+	                mv.message_type AS MessageType,
 	                mv.text_data AS MessageText,
-	                mm.file_path AS MediaFilePath
+	                mm.file_path AS FilePath,
+	                mt.thumbnail AS Thumbnail
                 FROM message_view mv
                 LEFT JOIN message_media mm ON mm.message_row_id = mv._id 
-                LEFT JOIN chat_view cv ON cv._id = mv.chat_row_id;
+                LEFT JOIN chat_view cv ON cv._id = mv.chat_row_id
+                LEFT JOIN message_thumbnail mt ON mt.message_row_id = mv.chat_row_id
             ";
 
             CommandDefinition commandDefinition = new(commandText, cancellationToken: cancellationToken);
