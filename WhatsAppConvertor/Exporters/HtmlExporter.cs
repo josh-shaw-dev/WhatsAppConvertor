@@ -33,17 +33,13 @@ namespace WhatsAppConvertor.Exporters
         {
             if (_options.Html)
             {
-                /*
-                 * TODO I think for large amount of messages I should serialize them to disk
-                 * then have the browser load in each chat when its needed
-                 * It won't be a easy to share single file though will be much nicer on the browser to load
-                 */
-
                 string outputDir = Path.Combine(_options.Directory, "html");
-                string outputPath = Path.Combine(outputDir, "output.html");
+                string outputPath = Path.Combine(outputDir, "index.html");
+                string outputChatPath = Path.Combine(outputDir, "chats");
                 _logger.LogInformation("Html export enabled, exporting to {ExportPath}", outputPath);
 
                 Directory.CreateDirectory(outputDir);
+                Directory.CreateDirectory(outputChatPath);
                 RazorTemplateEngine.Initialize();
 
                 IDictionary<string?, Contact> contactsJidDict = contacts.ToDictionary(c => c.RawStringJid);
@@ -54,49 +50,41 @@ namespace WhatsAppConvertor.Exporters
                     ChatMessage? chatMessage = groupChat.FirstOrDefault(c => !string.IsNullOrWhiteSpace(c.RawStringJid));
                     contactsJidDict.TryGetValue(chatMessage?.RawStringJid ?? string.Empty, out Contact? contact);
 
+                    string? displayName = contact?.DisplayName ?? chatMessage?.RawStringJid;
+
+                    ChatMessagesModel messagesModel = new()
+                    {
+                        DisplayName = displayName,
+                        ChatMessages = _mapper.Map<List<ChatMessageDto>>(groupChat.ToList())
+                    };
+
+                    // Write the messages to html files
+                    string messageHtmlOutputPath = Path.Combine(outputChatPath, $"chat-{groupChat.Key}.html");
+                    string messageHtml = await RazorTemplateEngine.RenderAsync("/Views/MessagesView.cshtml", messagesModel);
+                    using StreamWriter messageHtmlWriter = File.CreateText(messageHtmlOutputPath);
+
+                    await messageHtmlWriter.WriteAsync(messageHtml);
+
                     ChatGroupDto chatGroup = new()
                     {
                         ChatId = groupChat.Key,
-                        DisplayName = contact?.DisplayName ?? chatMessage?.RawStringJid
+                        DisplayName = displayName
                     };
                     chatGroups.Add(chatGroup);
                 }
 
-                ChatMessagesModel model = new()
+                ChatGroupModel model = new()
                 {
                     ChatGroups = chatGroups
                 };
-                string html = await RazorTemplateEngine.RenderAsync("/Views/MessageView.cshtml", model);
+                string html = await RazorTemplateEngine.RenderAsync("/Views/ChatGroupView.cshtml", model);
                 using StreamWriter htmlWriter = File.CreateText(outputPath);
 
                 await htmlWriter.WriteAsync(html);
-
-                await SerializeData(outputDir, chats);
             }
             else
             {
                 _logger.LogDebug("Html export is not enabled");
-            }
-        }
-
-        private static async Task SerializeData(string outputBaseDirectory, IEnumerable<ChatMessage> chats)
-        {
-            JsonSerializerOptions serializerOptions = new()
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            };
-            IEnumerable<IGrouping<int, ChatMessage>> groupedChats = chats.GroupBy(c => c.ChatId);
-            string outputChatDirectory = Path.Combine(outputBaseDirectory, "chats");
-            Directory.CreateDirectory(outputChatDirectory);
-
-            foreach (IGrouping<int, ChatMessage> groupChat in groupedChats)
-            {
-                int chatId = groupChat.Key;
-                string chatOutputPath = Path.Combine(outputChatDirectory, $"chat-{chatId}.json");
-
-                using FileStream messageStream = File.Create(chatOutputPath);
-                await JsonSerializer.SerializeAsync(messageStream, groupChat, serializerOptions);
-                await messageStream.DisposeAsync();
             }
         }
     }

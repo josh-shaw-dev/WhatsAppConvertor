@@ -1,4 +1,4 @@
-﻿namespace WhatsAppConvertor.Models
+﻿namespace WhatsAppConvertor.Domain
 {
     /*
      * Reverse engineered from the message_view table

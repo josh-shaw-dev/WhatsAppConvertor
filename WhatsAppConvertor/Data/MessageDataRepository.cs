@@ -44,7 +44,7 @@ namespace WhatsAppConvertor.Data
                 FROM message_view mv
                 LEFT JOIN message_media mm ON mm.message_row_id = mv._id 
                 LEFT JOIN chat_view cv ON cv._id = mv.chat_row_id
-                LEFT JOIN message_thumbnail mt ON mt.message_row_id = mv.chat_row_id
+                LEFT JOIN message_thumbnail mt ON mt.message_row_id = mv._id
             ";
 
             CommandDefinition commandDefinition = new(commandText, cancellationToken: cancellationToken);

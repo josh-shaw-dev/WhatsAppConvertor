@@ -5,6 +5,8 @@ namespace RazorTemplates.Models
 {
     public class ChatMessagesModel
     {
-        public IEnumerable<ChatGroupDto> ChatGroups { get; set; }
+        public string DisplayName { get; set; }
+
+        public IEnumerable<ChatMessageDto> ChatMessages { get; set; }
     }
 }

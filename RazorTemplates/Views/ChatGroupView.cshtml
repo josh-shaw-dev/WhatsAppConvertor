@@ -1,6 +1,7 @@
 ﻿@using System.Text
 @using System.Text.Json
-@model RazorTemplates.Models.ChatMessagesModel
+@using WhatsAppConvertor.Domain.Dto
+@model RazorTemplates.Models.ChatGroupModel
 
 <!doctype html>
 <html lang="en">
@@ -15,10 +16,7 @@
         <div class='container'>
             <div class='row'>
                 @{
-                    /*
-                    * This is a bit of a mess, needs a decent way of grouping to make a page like the web whatsapp
-                    */
-                    var chatGroups = Model.ChatGroups;
+                    IEnumerable<ChatGroupDto> chatGroups = Model.ChatGroups;
                     StringBuilder groupBuilder = new();
 
                     groupBuilder.AppendLine("<div class='col-md-3'>");
@@ -32,7 +30,7 @@
                     }
 
                     groupBuilder.AppendLine("</div>");
-                    @Html.Raw(groupBuilder);
+                                                        @Html.Raw(groupBuilder);
                 }
             </div>
         </div>
@@ -44,18 +42,20 @@
     const chats = document.querySelectorAll('.chat-group');
 
     chats.forEach(chat => {
-        chat.addEventListener('click', async (event) => {
+        chat.addEventListener('click', (event) => {
             const target = event.target;
             const chatId = parseInt(target.getAttribute('data-chat-id'));
+            const urlArray = window.location.href.split("/");
 
-            target.setAttribute('style', 'background-color: yellow;');
+            // take the last element and replace with the new chat id
+            urlArray[urlArray.length - 1] = `chats/chat-${chatId}.html`;
+            window.location.href = urlArray.join('/');
         });
     });
 
-    async function loadChat(chatId) {
-
+    function openInNewTab(url) {
+        window.open(url, '_blank').focus();
     }
-
 }());
 
 </script>

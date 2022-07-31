@@ -1,4 +1,6 @@
-﻿namespace WhatsAppConvertor.Models
+﻿using WhatsAppConvertor.Domain;
+
+namespace WhatsAppConvertor.Models
 {
     public class ChatMessage
     {
