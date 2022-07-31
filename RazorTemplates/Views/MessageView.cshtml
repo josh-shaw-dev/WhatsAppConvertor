@@ -13,53 +13,49 @@
 
     <body>
         <div class='container'>
-            <div class=row>
+            <div class='row'>
                 @{
                     /*
-                     * This is a bit of a mess, needs a decent way of grouping to make a page like the web whatsapp
+                    * This is a bit of a mess, needs a decent way of grouping to make a page like the web whatsapp
                     */
-                    var grouped = Model.ChatMessagesAndContacts.GroupBy(c => c.ChatMessage.ChatId);
-
+                    var chatGroups = Model.ChatGroups;
                     StringBuilder groupBuilder = new();
-                    StringBuilder messageBuilder = new();
 
                     groupBuilder.AppendLine("<div class='col-md-3'>");
 
-                    foreach (var group in grouped)
+                    foreach (var chat in chatGroups)
                     {
-                        int chatId = group.Key;
+                        int chatId = chat.ChatId;
+                        string displayName = chat.DisplayName ?? "Unknown contact"; 
 
-                        if (!group.Any())
-                        {
-                            continue;
-                        }
-
-                        string displayName = group.Where(g => !string.IsNullOrWhiteSpace(g.Contact?.DisplayName))
-                            .Select(c => c.Contact?.DisplayName).FirstOrDefault();
-
-                        // TODO add a chat id to the group so we can unhide the messages
-                        groupBuilder.AppendLine($"<ul>{displayName ?? "Unknown contact"}</ul>");
-
-                        var counter = 0;
-
-                        foreach(var item in group)
-                        {
-                            if (counter < 10)
-                            {
-                                messageBuilder.AppendLine($"<div id=message_chat_id{item.ChatMessage?.ChatId} hidden>{item.ChatMessage?.MessageFrom} -{@item.ChatMessage?.MessageText}</div>");
-                            }
-                            counter++;
-                        }
+                        groupBuilder.AppendLine($"<ul class='chat-group' data-chat-id={chatId}>{displayName}</ul>");
                     }
 
                     groupBuilder.AppendLine("</div>");
                     @Html.Raw(groupBuilder);
-
-                    <div class='col-md-9'>
-                        @Html.Raw(messageBuilder)
-                    </div>
                 }
             </div>
         </div>
     </body>
 </html>
+
+<script>
+(function() {
+    const chats = document.querySelectorAll('.chat-group');
+
+    chats.forEach(chat => {
+        chat.addEventListener('click', async (event) => {
+            const target = event.target;
+            const chatId = parseInt(target.getAttribute('data-chat-id'));
+
+            target.setAttribute('style', 'background-color: yellow;');
+        });
+    });
+
+    async function loadChat(chatId) {
+
+    }
+
+}());
+
+</script>

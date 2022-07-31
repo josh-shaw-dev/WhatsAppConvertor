@@ -2,7 +2,7 @@
 
 namespace WhatsAppConvertor.Domain.Dto
 {
-    public class ChatMessageDto
+    public class ChatMessageDto 
     {
         public int MessageId { get; set; }
 

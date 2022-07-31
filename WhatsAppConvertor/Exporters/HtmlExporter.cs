@@ -46,13 +46,25 @@ namespace WhatsAppConvertor.Exporters
                 Directory.CreateDirectory(outputDir);
                 RazorTemplateEngine.Initialize();
 
-                List<ChatMessageDto> mappedMessages = _mapper.Map<List<ChatMessageDto>>(chats);
-                List<ChatMessageAndContactDto> mappedMessagesAndContacts = _mapper.Map<List<ChatMessageAndContactDto>>(messagesWithContacts);
+                IDictionary<string?, Contact> contactsJidDict = contacts.ToDictionary(c => c.RawStringJid);
+                IList<ChatGroupDto> chatGroups = new List<ChatGroupDto>();
+                var groupedChats = chats.GroupBy(c => c.ChatId);
+                foreach (IGrouping<int, ChatMessage> groupChat in groupedChats)
+                {
+                    ChatMessage? chatMessage = groupChat.FirstOrDefault(c => !string.IsNullOrWhiteSpace(c.RawStringJid));
+                    contactsJidDict.TryGetValue(chatMessage?.RawStringJid ?? string.Empty, out Contact? contact);
+
+                    ChatGroupDto chatGroup = new()
+                    {
+                        ChatId = groupChat.Key,
+                        DisplayName = contact?.DisplayName ?? chatMessage?.RawStringJid
+                    };
+                    chatGroups.Add(chatGroup);
+                }
+
                 ChatMessagesModel model = new()
                 {
-                    ChatMessages = mappedMessages,
-                    Contacts = _mapper.Map<List<ContactDto>>(contacts),
-                    ChatMessagesAndContacts = mappedMessagesAndContacts
+                    ChatGroups = chatGroups
                 };
                 string html = await RazorTemplateEngine.RenderAsync("/Views/MessageView.cshtml", model);
                 using StreamWriter htmlWriter = File.CreateText(outputPath);
