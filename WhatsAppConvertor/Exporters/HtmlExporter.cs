@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using Razor.Templating.Core;
 using RazorTemplates.Models;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using WhatsAppConvertor.Configuration;
 using WhatsAppConvertor.Domain.Dto;
 using WhatsAppConvertor.Models;
@@ -59,12 +60,13 @@ namespace WhatsAppConvertor.Exporters
                     };
 
                     // Write the messages to html files
-                    string messageHtmlOutputPath = Path.Combine(outputChatPath, $"chat-{groupChat.Key}.html");
+                    Regex pathNormaliser = new("/|\\s");
+                    string normalisedDisplayName = pathNormaliser.Replace(displayName ?? string.Empty, "-");
+                    string messageHtmlOutputPath = Path.Combine(outputChatPath, $"chat-{groupChat.Key}.html").ToLower();
                     string messageHtml = await RazorTemplateEngine.RenderAsync("/Views/MessagesView.cshtml", messagesModel);
                     using StreamWriter messageHtmlWriter = File.CreateText(messageHtmlOutputPath);
 
                     await messageHtmlWriter.WriteAsync(messageHtml);
-
                     ChatGroupDto chatGroup = new()
                     {
                         ChatId = groupChat.Key,

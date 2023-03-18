@@ -15,6 +15,8 @@ namespace WhatsAppConvertor.Models
         public long MessageRecievedTime { get; set; }
 
         public string? MessageText { get; set; }
+        
+        public string? QuotedText { get; set; }
 
         public string? FilePath { get; set; }
 

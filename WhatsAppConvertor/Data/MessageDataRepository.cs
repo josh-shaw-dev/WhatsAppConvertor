@@ -40,11 +40,13 @@ namespace WhatsAppConvertor.Data
 	                mv.message_type AS MessageType,
 	                mv.text_data AS MessageText,
 	                mm.file_path AS FilePath,
-	                mt.thumbnail AS Thumbnail
+	                mt.thumbnail AS Thumbnail,
+                    mq.text_data as QuotedText
                 FROM message_view mv
                 LEFT JOIN message_media mm ON mm.message_row_id = mv._id 
                 LEFT JOIN chat_view cv ON cv._id = mv.chat_row_id
                 LEFT JOIN message_thumbnail mt ON mt.message_row_id = mv._id
+                LEFT JOIN message_quoted mq ON mq.message_row_id = mv._id AND mq.chat_row_id = mv.chat_row_id
             ";
 
             CommandDefinition commandDefinition = new(commandText, cancellationToken: cancellationToken);

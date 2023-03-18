@@ -12,6 +12,8 @@ namespace WhatsAppConvertor.Domain.Dto
 
         public string? MessageText { get; set; }
 
+        public string? QuotedText { get; set; }
+
         public string? FilePath { get; set; }
 
         public string? Thumbnail { get; set; }

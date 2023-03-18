@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using WhatsAppConvertor.Configuration;
 using WhatsAppConvertor.Data;
@@ -58,5 +59,13 @@ foreach (ChatMessage chatMessage in chats)
 
 foreach (IExporter exporter in exporters)
 {
-    await exporter.ExportAsync(chats, contacts, messagesWithContacts);
+    try
+    {
+        await exporter.ExportAsync(chats, contacts, messagesWithContacts);
+    }
+    catch (Exception ex)
+    {
+        ILogger logger = host.Services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Failed to export");
+    }
 }
