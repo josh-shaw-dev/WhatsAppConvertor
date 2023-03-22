@@ -38,7 +38,7 @@ namespace WhatsAppConvertor.Exporters
 
                     if (message != null)
                     {
-                        DateTimeOffset messageRecievedTime = DateTimeOffset.FromUnixTimeMilliseconds(message.MessageRecievedTime);
+                        DateTimeOffset messageRecievedTime = DateTimeOffset.FromUnixTimeMilliseconds(message.Timestamp);
                         string? from = message.MessageFromMe ? "Me" : contact?.DisplayName ?? contact?.RawStringJid;
                         string? messageText = message.FilePath ?? message.MessageText;
 

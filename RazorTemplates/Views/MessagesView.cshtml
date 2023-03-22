@@ -48,7 +48,7 @@
                         messageType == MessageType.Document;
                 }
 
-                IEnumerable<IGrouping<DateTime, ChatMessageDto>> messagesGroupByDate = Model.ChatMessages.GroupBy(cm => cm.MessageRecievedTime.Date);
+                IEnumerable<IGrouping<DateTime, ChatMessageDto>> messagesGroupByDate = Model.ChatMessages.GroupBy(cm => cm.Timestamp.Date);
                 StringBuilder groupBuilder = new();
 
                 groupBuilder.AppendLine("<div class=''>");
@@ -82,7 +82,7 @@
                             groupBuilder.AppendLine($"<div>Contact: {chat.MessageText}</div>");
                         }
 
-                        groupBuilder.AppendLine($"<div class='message-time'>{chat.MessageRecievedTime.ToShortTimeString()}</div>");
+                        groupBuilder.AppendLine($"<div class='message-time'>{chat.Timestamp.ToShortTimeString()}</div>");
 
                         groupBuilder.AppendLine("</div>");
                     }

@@ -12,7 +12,7 @@ namespace WhatsAppConvertor.Models
 
         public bool MessageFromMe { get; set; }
 
-        public long MessageRecievedTime { get; set; }
+        public long Timestamp { get; set; }
 
         public string? MessageText { get; set; }
         

@@ -8,7 +8,7 @@ namespace WhatsAppConvertor.Domain.Dto
 
         public bool MessageFromMe { get; set; }
 
-        public DateTime MessageRecievedTime { get; set; }
+        public DateTime Timestamp { get; set; }
 
         public string? MessageText { get; set; }
 

@@ -36,7 +36,7 @@ namespace WhatsAppConvertor.Data
 	                mv.sort_id AS MessageSortId,
 	                mv.from_me AS MessageFromMe,
 	                mv.chat_row_id as ChatId,
-	                mv.received_timestamp AS MessageRecievedTime,
+	                mv.timestamp AS Timestamp,
 	                mv.message_type AS MessageType,
 	                mv.text_data AS MessageText,
 	                mm.file_path AS FilePath,

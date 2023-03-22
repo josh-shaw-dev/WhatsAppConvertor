@@ -41,9 +41,8 @@ namespace WhatsAppConvertor.Exporters
 
                 Directory.CreateDirectory(outputDir);
                 Directory.CreateDirectory(outputChatPath);
-                RazorTemplateEngine.Initialize();
 
-                IDictionary<string?, Contact> contactsJidDict = contacts.ToDictionary(c => c.RawStringJid);
+                IDictionary<string, Contact> contactsJidDict = contacts.ToDictionary(c => c.RawStringJid ?? string.Empty);
                 IList<ChatGroupDto> chatGroups = new List<ChatGroupDto>();
                 var groupedChats = chats.GroupBy(c => c.ChatId);
                 foreach (IGrouping<int, ChatMessage> groupChat in groupedChats)

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -11,12 +12,12 @@ using WhatsAppConvertor.Models;
 using IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
     {
-        services.Configure<MessageDatabaseOptions>(
-            context.Configuration.GetSection(MessageDatabaseOptions.Position));
-        services.Configure<WaDatabaseOptions>(
-            context.Configuration.GetSection(WaDatabaseOptions.Position));
-        services.Configure<ExportOptions>(
-            context.Configuration.GetSection(ExportOptions.Position));
+        services.AddOptions<MessageDatabaseOptions>()
+            .Bind(context.Configuration.GetSection(MessageDatabaseOptions.Position));
+        services.AddOptions<WaDatabaseOptions>()
+            .Bind(context.Configuration.GetSection(WaDatabaseOptions.Position));
+        services.AddOptions<ExportOptions>()
+            .Bind(context.Configuration.GetSection(ExportOptions.Position));
 
         services.AddSingleton<IMessageDataRepository, MessageDataRepository>();
         services.AddSingleton<IContactDataRepository, ContactDataRepository>();
@@ -37,7 +38,7 @@ IEnumerable<IExporter> exporters = host.Services.GetServices<IExporter>();
 
 IEnumerable<ChatMessage> chats = await messageRepo.GetChats();
 IEnumerable<Contact> contacts = await contactRepo.GetContacts();
-IDictionary<string?, Contact> contactsJidDict = contacts.ToDictionary(c => c.RawStringJid);
+IDictionary<string, Contact> contactsJidDict = contacts.ToDictionary(c => c.RawStringJid ?? string.Empty);
 
 IList<ChatMessageAndContact> messagesWithContacts = new List<ChatMessageAndContact>();
 foreach (ChatMessage chatMessage in chats)
@@ -54,8 +55,6 @@ foreach (ChatMessage chatMessage in chats)
 
     messagesWithContacts.Add(message);
 }
-
-// TODO if the output dir doesnt exist we should try create it?
 
 foreach (IExporter exporter in exporters)
 {
