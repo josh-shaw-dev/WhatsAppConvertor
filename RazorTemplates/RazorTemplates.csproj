@@ -11,4 +11,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Domain\WhatsAppConvertor.Domain.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Helpers\" />
+  </ItemGroup>
 </Project>

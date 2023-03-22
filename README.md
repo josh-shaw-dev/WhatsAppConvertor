@@ -5,9 +5,8 @@ You will need the unencrypted message and contact db, this does not deal with de
 
 
 #TODO
- - Quoted messages
  - Scrollable windows
  - Better looking css
- - Bundle bootstrap css locally for proper offline
  - Media links to open
  - Save files to individual folders for easy sharing with one person
+ - Investigate dates coming in at epoch 1970
