@@ -23,7 +23,7 @@ namespace WhatsAppConvertor.Exporters
             IEnumerable<Contact> contacts,
             IList<ChatMessageAndContact> messagesWithContacts)
         {
-            if (_options.Text)
+            if (_options.Text.Enabled)
             {
                 string outputPath = Path.Combine(_options.Directory, "output.txt");
 

@@ -30,9 +30,8 @@ namespace WhatsAppConvertor.Exporters
             IEnumerable<Contact> contacts,
             IList<ChatMessageAndContact> messagesWithContacts)
         {
-            if (_options.Html)
+            if (_options.Html.Enabled)
             {
-                char[] unwantedFileSeperators = new char[] { ' ', '\\', '/' };
                 string outputDir = Path.Combine(_options.Directory, "html");
                 string outputPath = Path.Combine(outputDir, "index.html");
 
@@ -64,6 +63,11 @@ namespace WhatsAppConvertor.Exporters
                     string outputChatPath = Path.Combine(outputDir, chatGroup.FilePath);
                     Directory.CreateDirectory(outputChatPath);
 
+                    if (_options.Html.CopyMedia)
+                    {
+                        await CopyMedia(groupChat, outputChatPath);
+                    }
+
                     // Write the messages to html files
                     string messageHtmlOutputPath = Path.Combine(outputChatPath, $"chat-{chatGroup.FilePath}.html");
                     string messageHtml = await RazorTemplateEngine.RenderAsync("/Views/MessagesView.cshtml", messagesModel);
@@ -82,6 +86,49 @@ namespace WhatsAppConvertor.Exporters
             else
             {
                 _logger.LogDebug("Html export is not enabled");
+            }
+        }
+
+        private async Task CopyMedia(IGrouping<int, ChatMessage> groupChat, string outputChatPath)
+        {
+            string mediaBasePath = _options.Html.MediaPath ?? string.Empty;
+
+            if (string.IsNullOrWhiteSpace(mediaBasePath))
+            {
+                throw new ArgumentException(
+                    $"Media path cannot be empty or null when {nameof(HtmlOptions.MediaPath)} is enabled",
+                    _options.Html.MediaPath);
+            }
+
+            if (!Directory.Exists(mediaBasePath))
+            {
+                throw new DirectoryNotFoundException("Media directory does not exist");
+            }
+
+            foreach (ChatMessage message in groupChat)
+            {
+                if (!string.IsNullOrWhiteSpace(message.FilePath))
+                {
+                    string fullSrcFilePath = Path.Combine(mediaBasePath, message.FilePath);
+                    string fullDestFilePath = Path.Combine(outputChatPath, message.FilePath);
+
+                    string? destDirectory = Path.GetDirectoryName(fullDestFilePath);
+                    if (!string.IsNullOrWhiteSpace(destDirectory))
+                    {
+                        Directory.CreateDirectory(destDirectory);
+                    }
+
+                    if (File.Exists(fullSrcFilePath))
+                    {
+                        using FileStream sourceStream = File.Open(fullSrcFilePath, FileMode.Open);
+                        using FileStream destinationStream = File.Create(fullDestFilePath);
+                        await sourceStream.CopyToAsync(destinationStream);
+                    }
+                    else
+                    {
+                        _logger.LogDebug("Source file does not exist: {SrcFilePath}", fullSrcFilePath);
+                    }
+                }
             }
         }
 

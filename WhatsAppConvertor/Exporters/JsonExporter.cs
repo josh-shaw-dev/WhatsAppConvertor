@@ -24,7 +24,7 @@ namespace WhatsAppConvertor.Exporters
             IEnumerable<Contact> contacts,
             IList<ChatMessageAndContact> messagesWithContacts)
         {
-            if (_options.Json)
+            if (_options.Json.Enabled)
             {
                 string messageOutputPath = Path.Combine(_options.Directory, "messages.json");
                 string contactsOutputPath = Path.Combine(_options.Directory, "contacts.json");

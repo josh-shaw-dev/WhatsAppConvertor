@@ -75,7 +75,21 @@
                         }
                         else if (MessageTypeHasThumbNail(messageType) && !string.IsNullOrWhiteSpace(chat.Thumbnail))
                         {
-                            groupBuilder.AppendLine($"<img alt='{chat.MessageText}' src='data:image/jpeg;base64,{chat.Thumbnail}' /><div>{chat.MessageText}</div>");
+                            string imgHtml = $"<img alt='{chat.MessageText}' src='data:image/jpeg;base64,{chat.Thumbnail}' />";
+                            string messageHtml = $"<div>{chat.MessageText}</div>";
+
+                            if (!string.IsNullOrWhiteSpace(chat.FilePath))
+                            {
+                                groupBuilder.AppendLine($"<a href='{chat.FilePath}' target='_blank'>")
+                                    .AppendLine(imgHtml)
+                                    .AppendLine("</a>")
+                                    .AppendLine(messageHtml);
+                            }
+                            else
+                            {
+                                groupBuilder.AppendLine(imgHtml)
+                                    .AppendLine(messageHtml);
+                            }
                         }
                         else if (messageType == MessageType.Contact)
                         {
@@ -92,7 +106,6 @@
 
                 // Write the html
                 <div class="chat-title">@Model.DisplayName </div>
-
                 @Html.Raw(groupBuilder);
             }
             </div>
