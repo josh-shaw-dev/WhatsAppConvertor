@@ -23,10 +23,9 @@
 
                     foreach (var chat in chatGroups)
                     {
-                        int chatId = chat.ChatId;
                         string displayName = chat.DisplayName ?? "Unknown contact"; 
 
-                        groupBuilder.AppendLine($"<ul class='chat-group' data-chat-id={chatId}>{displayName}</ul>");
+                        groupBuilder.AppendLine($"<ul class='chat-group' data-chat-filepath={chat.FilePath}>{displayName}</ul>");
                     }
 
                     groupBuilder.AppendLine("</div>");
@@ -44,11 +43,11 @@
     chats.forEach(chat => {
         chat.addEventListener('click', (event) => {
             const target = event.target;
-            const chatId = parseInt(target.getAttribute('data-chat-id'));
+            const chatFilePath = target.getAttribute('data-chat-filepath');
             const urlArray = window.location.href.split("/");
 
             // take the last element and replace with the new chat id
-            urlArray[urlArray.length - 1] = `chats/chat-${chatId}.html`;
+            urlArray[urlArray.length - 1] = `${chatFilePath}/chat-${chatFilePath}.html`;
             window.location.href = urlArray.join('/');
         });
     });

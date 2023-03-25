@@ -3,8 +3,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Razor.Templating.Core;
 using RazorTemplates.Models;
-using System.Text.Json;
-using System.Text.RegularExpressions;
 using WhatsAppConvertor.Configuration;
 using WhatsAppConvertor.Domain.Dto;
 using WhatsAppConvertor.Models;
@@ -34,13 +32,13 @@ namespace WhatsAppConvertor.Exporters
         {
             if (_options.Html)
             {
+                char[] unwantedFileSeperators = new char[] { ' ', '\\', '/' };
                 string outputDir = Path.Combine(_options.Directory, "html");
                 string outputPath = Path.Combine(outputDir, "index.html");
-                string outputChatPath = Path.Combine(outputDir, "chats");
+
                 _logger.LogInformation("Html export enabled, exporting to {ExportPath}", outputPath);
 
                 Directory.CreateDirectory(outputDir);
-                Directory.CreateDirectory(outputChatPath);
 
                 IDictionary<string, Contact> contactsJidDict = contacts.ToDictionary(c => c.RawStringJid ?? string.Empty);
                 IList<ChatGroupDto> chatGroups = new List<ChatGroupDto>();
@@ -51,27 +49,26 @@ namespace WhatsAppConvertor.Exporters
                     contactsJidDict.TryGetValue(chatMessage?.RawStringJid ?? string.Empty, out Contact? contact);
 
                     string? displayName = contact?.DisplayName ?? chatMessage?.RawStringJid;
-
                     ChatMessagesModel messagesModel = new()
                     {
                         DisplayName = displayName,
                         ChatMessages = _mapper.Map<List<ChatMessageDto>>(groupChat.ToList())
                     };
-
-                    // Write the messages to html files
-                    Regex pathNormaliser = new("/|\\s");
-                    string normalisedDisplayName = pathNormaliser.Replace(displayName ?? string.Empty, "-");
-                    string messageHtmlOutputPath = Path.Combine(outputChatPath, $"chat-{groupChat.Key}.html").ToLower();
-                    string messageHtml = await RazorTemplateEngine.RenderAsync("/Views/MessagesView.cshtml", messagesModel);
-                    using StreamWriter messageHtmlWriter = File.CreateText(messageHtmlOutputPath);
-
-                    await messageHtmlWriter.WriteAsync(messageHtml);
                     ChatGroupDto chatGroup = new()
                     {
                         ChatId = groupChat.Key,
                         DisplayName = displayName
                     };
                     chatGroups.Add(chatGroup);
+
+                    string outputChatPath = Path.Combine(outputDir, chatGroup.FilePath);
+                    Directory.CreateDirectory(outputChatPath);
+
+                    // Write the messages to html files
+                    string messageHtmlOutputPath = Path.Combine(outputChatPath, $"chat-{chatGroup.FilePath}.html");
+                    string messageHtml = await RazorTemplateEngine.RenderAsync("/Views/MessagesView.cshtml", messagesModel);
+
+                    await WriteFileAsync(messageHtmlOutputPath, messageHtml);
                 }
 
                 ChatGroupModel model = new()
@@ -79,14 +76,20 @@ namespace WhatsAppConvertor.Exporters
                     ChatGroups = chatGroups
                 };
                 string html = await RazorTemplateEngine.RenderAsync("/Views/ChatGroupView.cshtml", model);
-                using StreamWriter htmlWriter = File.CreateText(outputPath);
 
-                await htmlWriter.WriteAsync(html);
+                await WriteFileAsync(outputPath, html);
             }
             else
             {
                 _logger.LogDebug("Html export is not enabled");
             }
+        }
+
+        private static async Task WriteFileAsync(string filePath, string fileContent)
+        {
+            using StreamWriter htmlWriter = File.CreateText(filePath);
+
+            await htmlWriter.WriteAsync(fileContent);
         }
     }
 }

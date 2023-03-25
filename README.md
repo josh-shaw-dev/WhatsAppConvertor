@@ -26,6 +26,5 @@ Defaults are shown below
  - Scrollable windows
  - Better looking css
  - Media links to open in new tab
- - Save files to individual folders for easy sharing with one person
-   - Also have option to copy media
+ - Also have option to copy media
  - Write tests
