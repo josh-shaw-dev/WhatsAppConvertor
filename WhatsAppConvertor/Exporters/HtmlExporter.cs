@@ -3,26 +3,31 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Razor.Templating.Core;
 using RazorTemplates.Models;
+using System.IO.Abstractions;
+using System.Runtime.CompilerServices;
 using WhatsAppConvertor.Configuration;
 using WhatsAppConvertor.Domain.Dto;
 using WhatsAppConvertor.Models;
 
 namespace WhatsAppConvertor.Exporters
 {
-    internal class HtmlExporter : IExporter
+    public class HtmlExporter : IExporter
     {
-        private readonly IMapper _mapper;
         private readonly ILogger<HtmlExporter> _logger;
+        private readonly IMapper _mapper;
         private readonly ExportOptions _options;
+        private readonly IFileSystem _fileSystem;
 
         public HtmlExporter(
             ILogger<HtmlExporter> logger,
             IMapper mapper,
-            IOptions<ExportOptions> options)
+            IOptions<ExportOptions> options,
+            IFileSystem fileSystem)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
+            _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
         }
 
         public async Task ExportAsync(
@@ -37,7 +42,7 @@ namespace WhatsAppConvertor.Exporters
 
                 _logger.LogInformation("Html export enabled, exporting to {ExportPath}", outputPath);
 
-                Directory.CreateDirectory(outputDir);
+                _fileSystem.Directory.CreateDirectory(outputDir);
 
                 IDictionary<string, Contact> contactsJidDict = contacts.ToDictionary(c => c.RawStringJid ?? string.Empty);
                 IList<ChatGroupDto> chatGroups = new List<ChatGroupDto>();
@@ -115,13 +120,13 @@ namespace WhatsAppConvertor.Exporters
                     string? destDirectory = Path.GetDirectoryName(fullDestFilePath);
                     if (!string.IsNullOrWhiteSpace(destDirectory))
                     {
-                        Directory.CreateDirectory(destDirectory);
+                        _fileSystem.Directory.CreateDirectory(destDirectory);
                     }
 
                     if (File.Exists(fullSrcFilePath))
                     {
-                        using FileStream sourceStream = File.Open(fullSrcFilePath, FileMode.Open);
-                        using FileStream destinationStream = File.Create(fullDestFilePath);
+                        using FileSystemStream sourceStream = _fileSystem.File.Open(fullSrcFilePath, FileMode.Open);
+                        using FileSystemStream destinationStream = _fileSystem.File.Create(fullDestFilePath);
                         await sourceStream.CopyToAsync(destinationStream);
                     }
                     else
@@ -132,9 +137,9 @@ namespace WhatsAppConvertor.Exporters
             }
         }
 
-        private static async Task WriteFileAsync(string filePath, string fileContent)
+        private async Task WriteFileAsync(string filePath, string fileContent)
         {
-            using StreamWriter htmlWriter = File.CreateText(filePath);
+            using StreamWriter htmlWriter = _fileSystem.File.CreateText(filePath);
 
             await htmlWriter.WriteAsync(fileContent);
         }
