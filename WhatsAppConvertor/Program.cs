@@ -30,6 +30,8 @@ using IHost host = Host.CreateDefaultBuilder(args)
     })
     .Build();
 
+ILogger logger = host.Services.GetRequiredService<ILogger<Program>>();    
+
 IMessageDataRepository messageRepo = host.Services.GetRequiredService<IMessageDataRepository>();
 IContactDataRepository contactRepo = host.Services.GetRequiredService<IContactDataRepository>();
 ExportOptions outputOptions = host.Services.GetRequiredService<IOptions<ExportOptions>>().Value;
@@ -44,9 +46,6 @@ IList<ChatMessageAndContact> messagesWithContacts = new List<ChatMessageAndConta
 foreach (ChatMessage chatMessage in chats)
 {
     contactsJidDict.TryGetValue(chatMessage.RawStringJid ?? string.Empty, out Contact? contact);
-    string? from = chatMessage.MessageFromMe ? "Me" : contact?.DisplayName ?? contact?.RawStringJid;
-    string? messageText = chatMessage.FilePath ?? chatMessage.MessageText;
-
     ChatMessageAndContact message = new()
     {
         Contact = contact,
@@ -64,7 +63,6 @@ foreach (IExporter exporter in exporters)
     }
     catch (Exception ex)
     {
-        ILogger logger = host.Services.GetRequiredService<ILogger<Program>>();
         logger.LogError(ex, "Failed to export");
     }
 }
