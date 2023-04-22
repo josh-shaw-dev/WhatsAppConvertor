@@ -1,12 +1,13 @@
 using AutoFixture.Xunit2;
-using AutoMapper;
+using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.IO.Abstractions;
+using System.IO.Abstractions.TestingHelpers;
 using WhatsAppConvertor.Configuration;
 using WhatsAppConvertor.Exporters;
 using WhatsAppConvertor.Models;
 using WhatsAppConvertorTests.Common;
+using WhatsAppConvertorTests.Exporters.Customizations;
 
 namespace WhatsAppConvertorTests.Exporters
 {
@@ -29,20 +30,33 @@ namespace WhatsAppConvertorTests.Exporters
                 .VerifyLogWithLogLevel(LogLevel.Debug, Times.Once);
         }
 
-        [Theory, AutoMoqData]
-        public async Task ExportAsync_ShouldExport_WhenHtmlIsEnabled(
+        [Theory, AutoMoqData(typeof(MockedSetupHtmlExporter))]
+        public async Task ExportAsync_HtmlExportTrue_CreatesTheConfiguredBaseDirectory(
             [Frozen] IOptions<ExportOptions> iOptions,
-            [Frozen] IFileSystem fileSystem,
+            [Frozen] MockFileSystem fileSystem,
             List<ChatMessage> chats,
             List<Contact> contacts,
             List<ChatMessageAndContact> messagesWithContacts,
+            string baseDirectory,
             HtmlExporter sut)
         {
+            baseDirectory = GetBaseDirectory(baseDirectory);
             iOptions.Value.Html.Enabled = true;
+            iOptions.Value.Directory = baseDirectory;
 
             await sut.ExportAsync(chats, contacts, messagesWithContacts);
 
-            fileSystem.AsMock().Verify(d => d.Directory.CreateDirectory(It.IsAny<string>()), Times.Once);
+            fileSystem.AllDirectories.Should()
+                .Contain(dir => dir.StartsWith(baseDirectory));
+        }
+
+        private static string GetBaseDirectory(string path)
+        {
+            if (path.StartsWith(Path.DirectorySeparatorChar)) {
+                return path;
+            }
+
+            return $"{Path.DirectorySeparatorChar}{path}";
         }
     }
 }

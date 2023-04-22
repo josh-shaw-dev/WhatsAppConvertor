@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 using Razor.Templating.Core;
 using RazorTemplates.Models;
 using System.IO.Abstractions;
-using System.Runtime.CompilerServices;
+using System.Text;
 using WhatsAppConvertor.Configuration;
 using WhatsAppConvertor.Domain.Dto;
 using WhatsAppConvertor.Models;
@@ -66,7 +66,7 @@ namespace WhatsAppConvertor.Exporters
                     chatGroups.Add(chatGroup);
 
                     string outputChatPath = Path.Combine(outputDir, chatGroup.FilePath);
-                    Directory.CreateDirectory(outputChatPath);
+                    _fileSystem.Directory.CreateDirectory(outputChatPath);
 
                     if (_options.Html.CopyMedia)
                     {
@@ -139,9 +139,9 @@ namespace WhatsAppConvertor.Exporters
 
         private async Task WriteFileAsync(string filePath, string fileContent)
         {
-            using StreamWriter htmlWriter = _fileSystem.File.CreateText(filePath);
-
-            await htmlWriter.WriteAsync(fileContent);
+            using FileSystemStream? fileStream = _fileSystem.FileStream.New(filePath, FileMode.OpenOrCreate);
+            using StreamWriter streamWriter = new(fileStream, Encoding.UTF8);
+            await streamWriter.WriteAsync(fileContent);
         }
     }
 }
