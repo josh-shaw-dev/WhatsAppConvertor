@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.IO.Abstractions.TestingHelpers;
 using WhatsAppConvertor.Configuration;
+using WhatsAppConvertor.Domain.Dto;
 using WhatsAppConvertor.Exporters;
 using WhatsAppConvertor.Models;
 using WhatsAppConvertorTests.Common;
@@ -27,7 +28,7 @@ namespace WhatsAppConvertorTests.Exporters
             await sut.ExportAsync(chats, contacts, messagesWithContacts);
 
             logger.AsMock()
-                .VerifyLogWithLogLevel(LogLevel.Debug, Times.Once);
+                .VerifyLogWithLogLevelAndContainsMessage(LogLevel.Debug, Times.Once, "export is not enabled");
         }
 
         [Theory, AutoMoqData(typeof(MockedSetupHtmlExporter))]
@@ -47,7 +48,24 @@ namespace WhatsAppConvertorTests.Exporters
             await sut.ExportAsync(chats, contacts, messagesWithContacts);
 
             fileSystem.AllDirectories.Should()
-                .Contain(dir => dir.StartsWith(baseDirectory));
+                .Contain(dir => dir.StartsWith(baseDirectory), "because it should have created a base directory");
+        }
+
+        [Theory, AutoMoqData(typeof(MockedSetupHtmlExporter))]
+        public async Task ExportAsync_HtmlExportTrue_CreatesExpectedFiles(
+            [Frozen] IOptions<ExportOptions> iOptions,
+            [Frozen] MockFileSystem fileSystem,
+            List<ChatMessage> chats,
+            List<Contact> contacts,
+            List<ChatMessageAndContact> messagesWithContacts,
+            HtmlExporter sut)
+        {
+            iOptions.Value.Html.Enabled = true;
+
+            await sut.ExportAsync(chats, contacts, messagesWithContacts);
+
+            fileSystem.AllFiles.Should()
+                .Contain(file => chats.Any(c => file.Contains(chats.First().ChatId.ToString())));
         }
 
         private static string GetBaseDirectory(string path)
