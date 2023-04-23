@@ -1,9 +1,8 @@
-﻿using AutoMapper;
+﻿using System.IO.Abstractions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using WhatsAppConvertor.Configuration;
 using WhatsAppConvertor.Data;
 using WhatsAppConvertor.Exporters;
@@ -19,6 +18,7 @@ using IHost host = Host.CreateDefaultBuilder(args)
         services.AddOptions<ExportOptions>()
             .Bind(context.Configuration.GetSection(ExportOptions.Position));
 
+        services.AddSingleton<IFileSystem, FileSystem>();
         services.AddSingleton<IMessageDataRepository, MessageDataRepository>();
         services.AddSingleton<IContactDataRepository, ContactDataRepository>();
         services.AddAutoMapper(typeof(Program));
@@ -34,8 +34,6 @@ ILogger logger = host.Services.GetRequiredService<ILogger<Program>>();
 
 IMessageDataRepository messageRepo = host.Services.GetRequiredService<IMessageDataRepository>();
 IContactDataRepository contactRepo = host.Services.GetRequiredService<IContactDataRepository>();
-ExportOptions outputOptions = host.Services.GetRequiredService<IOptions<ExportOptions>>().Value;
-IMapper mapper = host.Services.GetRequiredService<IMapper>();
 IEnumerable<IExporter> exporters = host.Services.GetServices<IExporter>();
 
 IEnumerable<ChatMessage> chats = await messageRepo.GetChats();
