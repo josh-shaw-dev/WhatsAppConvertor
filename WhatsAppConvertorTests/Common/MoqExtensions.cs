@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using System;
 using System.Text.RegularExpressions;
 
 namespace WhatsAppConvertorTests.Common
@@ -21,13 +20,23 @@ namespace WhatsAppConvertorTests.Common
 
         public static void VerifyLogWithLogLevelAndContainsMessage<T>(this Mock<ILogger<T>> logger, LogLevel logLevel, Times times, string containsMessage)
         {
-            bool state(object v, Type t) => v.ToString().Contains(containsMessage);
+            bool state(object v, Type t) {
+                if (v is string s) {
+                    return s.Contains(containsMessage);
+                }
+                return false;
+            }
             Verify(logger, logLevel, times, state);
         }
 
         public static void VerifyLogWithLogLevelAndContainsMessage<T>(this Mock<ILogger<T>> logger, LogLevel logLevel, Times times, Regex containsRegex)
         {
-            bool state(object v, Type t) => containsRegex.IsMatch(v.ToString());
+            bool state(object v, Type t) {
+                if (v is string s) {
+                    return containsRegex.IsMatch(s);
+                }
+                return false;
+            }
             Verify(logger, logLevel, times, state);
         }
 
@@ -50,7 +59,7 @@ namespace WhatsAppConvertorTests.Common
                         It.IsAny<EventId>(),
                         It.Is<It.IsAnyType>((v, t) => messageCheck(v, t)),
                         It.IsAny<Exception>(),
-                        It.Is<Func<It.IsAnyType, Exception, string>>((v, t) => true)),
+                        It.Is<Func<It.IsAnyType, Exception?, string>>((v, t) => true)),
                     times,
                     "Failed to log amount/message as expected"
                 );
