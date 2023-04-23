@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System.IO.Abstractions;
+using System.Text;
 using System.Text.Json;
 using WhatsAppConvertor.Configuration;
 using WhatsAppConvertor.Models;
@@ -8,15 +10,18 @@ namespace WhatsAppConvertor.Exporters
 {
     internal class JsonExporter : IExporter
     {
-        private readonly ILogger<HtmlExporter> _logger;
+        private readonly ILogger<JsonExporter> _logger;
         private readonly ExportOptions _options;
+        private readonly IFileSystem _fileSystem;
 
         public JsonExporter(
-            ILogger<HtmlExporter> logger,
-            IOptions<ExportOptions> options)
+            ILogger<JsonExporter> logger,
+            IOptions<ExportOptions> options,
+            IFileSystem fileSystem)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
+            _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
         }
 
         public async Task ExportAsync(
@@ -32,19 +37,18 @@ namespace WhatsAppConvertor.Exporters
                 _logger.LogInformation("Text export enabled, exporting to {ExportPath} and {ExportPathTwo}",
                     messageOutputPath, contactsOutputPath);
 
+                _fileSystem.Directory.CreateDirectory(_options.Directory);
                 JsonSerializerOptions serializerOptions = new()
                 {
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                     WriteIndented = true
                 };
 
-                using FileStream messageStream = File.Create(messageOutputPath);
+                using FileSystemStream? messageStream = _fileSystem.FileStream.New(messageOutputPath, FileMode.OpenOrCreate);
                 await JsonSerializer.SerializeAsync(messageStream, chats, serializerOptions);
-                await messageStream.DisposeAsync();
 
-                using FileStream contactsStream = File.Create(contactsOutputPath);
-                await JsonSerializer.SerializeAsync(contactsStream, contacts, serializerOptions);
-                await contactsStream.DisposeAsync();
+                using FileSystemStream? contactsStream = _fileSystem.FileStream.New(contactsOutputPath, FileMode.OpenOrCreate);
+                await JsonSerializer.SerializeAsync(contactsStream, chats, serializerOptions);
             }
             else
             {

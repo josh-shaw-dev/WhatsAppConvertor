@@ -49,8 +49,6 @@ namespace WhatsAppConvertor.Data
 
             _logger.LogInformation("Retrieved {ContactCount} contacts from db", contacts.Count());
 
-
-
             return contacts;
         }
     }

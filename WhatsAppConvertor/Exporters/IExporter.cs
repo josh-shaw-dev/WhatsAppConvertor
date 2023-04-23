@@ -2,7 +2,7 @@
 
 namespace WhatsAppConvertor.Exporters
 {
-    internal interface IExporter
+    public interface IExporter
     {
         Task ExportAsync(IEnumerable<ChatMessage> chats, IEnumerable<Contact> contacts, IList<ChatMessageAndContact> messagesWithContacts);
     }
